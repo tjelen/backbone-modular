@@ -21,6 +21,6 @@ There are several changes to how Backbone is structured in order to enable its s
 Usage
 -----
 
-When using AMD (Require.js) just define "backbone" path and require all modules you need. The dependencies will be satisfied automatically.
+When using AMD (Require.js) just define "backbone" path and require all modules you need. Dependencies will be satisfied automatically.
 
-When using static-linked scripts, just include all files you need to use. The dependencies are visible at the top of each module's source files. The files can be loaded in any order, and the global Backbone object will be created by any module that loads first.
+When using static-linked scripts, just include all files you need to use. Dependencies are visible at the top of each module's source files. The files can be loaded in any order, and the global Backbone object will be created by any module that loads first.
