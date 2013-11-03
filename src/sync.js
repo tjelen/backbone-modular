@@ -25,7 +25,7 @@
   // Useful when interfacing with server-side languages like **PHP** that make
   // it difficult to read the body of `PUT` requests.
   var sync = function(method, model, options) {
-    var type = methodMap[method];
+    var type = sync.methodMap[method];
 
     // Default options, unless specified.
     _.defaults(options || (options = {}), {
@@ -80,7 +80,7 @@
     }
 
     // Make the request, allowing the user to override any Ajax options.
-    var xhr = options.xhr = Backbone.ajax(_.extend(params, options));
+    var xhr = options.xhr = sync.ajax(_.extend(params, options));
     model.trigger('request', model, xhr, options);
     return xhr;
   };
@@ -88,7 +88,7 @@
   var noXhrPatch = typeof window !== 'undefined' && !!window.ActiveXObject && !(window.XMLHttpRequest && (new XMLHttpRequest).dispatchEvent);
 
   // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
-  var methodMap = {
+  sync.methodMap = {
     'create': 'POST',
     'update': 'PUT',
     'patch':  'PATCH',
@@ -104,8 +104,15 @@
 
   if (global) {
     _.extend(global, { sync: sync });
+
     global.emulateHTTP = false;
     global.emulateJSON = false;
+
+    global.ajax = sync.ajax
+
+    sync.ajax = function () {
+      return global.ajax.apply(global, arguments);
+    }
   }
 
   return sync;
