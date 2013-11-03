@@ -43,7 +43,7 @@
   var addOptions = {add: true, remove: false};
 
   // Define the Collection's inheritable methods.
-  var pp = _.extend(Collection.prototype, Events, {
+  _.extend(Collection.prototype, Events, {
 
     // The default model for a collection is just a **Backbone.Model**.
     // This should be overridden in most cases.
