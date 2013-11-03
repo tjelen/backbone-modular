@@ -2,10 +2,10 @@
   if (typeof define === 'function' && define.amd) {
     define('backbone/sync', ['underscore', 'jquery'], factory);
   } else {
-    factory(_, $, Backbone || {});
+    factory(_, $, Backbone);
   }
 }(function (_, $, global) {
-  
+
   // Backbone.sync
   // -------------
 
@@ -25,12 +25,12 @@
   // Useful when interfacing with server-side languages like **PHP** that make
   // it difficult to read the body of `PUT` requests.
   var sync = function(method, model, options) {
-    var type = sync.methodMap[method];
+    var type = methodMap[method];
 
     // Default options, unless specified.
     _.defaults(options || (options = {}), {
-      emulateHTTP: false,
-      emulateJSON: false
+      emulateHTTP: global ? global.emulateHTTP : false,
+      emulateJSON: global ? global.emulateJSON : false
     });
 
     // Default JSON-request options.
@@ -70,14 +70,25 @@
       params.processData = false;
     }
 
+    // If we're sending a `PATCH` request, and we're in an old Internet Explorer
+    // that still has ActiveX enabled by default, override jQuery to use that
+    // for XHR instead. Remove this line when jQuery supports `PATCH` on IE8.
+    if (params.type === 'PATCH' && noXhrPatch) {
+      params.xhr = function() {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      };
+    }
+
     // Make the request, allowing the user to override any Ajax options.
-    var xhr = options.xhr = sync.ajax(_.extend(params, options));
+    var xhr = options.xhr = Backbone.ajax(_.extend(params, options));
     model.trigger('request', model, xhr, options);
     return xhr;
   };
 
+  var noXhrPatch = typeof window !== 'undefined' && !!window.ActiveXObject && !(window.XMLHttpRequest && (new XMLHttpRequest).dispatchEvent);
+
   // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
-  sync.methodMap = {
+  var methodMap = {
     'create': 'POST',
     'update': 'PUT',
     'patch':  'PATCH',
@@ -86,11 +97,16 @@
   };
 
   // Set the default implementation of `sync.ajax` to proxy through to `$`.
+  // Override this if you'd like to use a different library.
   sync.ajax = function() {
     return $.ajax.apply($, arguments);
   };
 
-  global && (Backbone = _.extend(global, { sync: sync }));
+  if (global) {
+    _.extend(global, { sync: sync });
+    global.emulateHTTP = false;
+    global.emulateJSON = false;
+  }
 
   return sync;
 }));

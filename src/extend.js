@@ -2,7 +2,8 @@
   if (typeof define === 'function' && define.amd) {
     define('backbone/extend', ['underscore'], factory);
   } else {
-    factory(_, Backbone || {});
+    var Backbone = window.Backbone || (window.Backbone = {});
+    factory(_, Backbone);
   }
 }(function (_, global) {
   
@@ -19,7 +20,7 @@
     if (protoProps && _.has(protoProps, 'constructor')) {
       child = protoProps.constructor;
     } else {
-      child = function(){ parent.apply(this, arguments); };
+      child = function(){ return parent.apply(this, arguments); };
     }
 
     // Add static properties to the constructor function, if supplied.
